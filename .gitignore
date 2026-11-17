@@ -1,0 +1,11 @@
+# Root gitignore
+node_modules/
+vendor/
+.env
+.env.backup
+.phpunit.result.cache
+*.log
+dist/
+tools/
+.vscode/
+.idea/

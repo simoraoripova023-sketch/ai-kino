@@ -1,0 +1,29 @@
+{
+  "name": "aikino-frontend",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "postinstall": "node -e \"const fs=require('fs'); const p='node_modules/rollup/dist/native.js'; if(fs.existsSync(p)){ let c=fs.readFileSync(p,'utf8'); c=c.replace(/const nativeModule = [^;]+;/, 'const nativeModule = require(\\'@rollup/wasm-node/dist/native.js\\');'); fs.writeFileSync(p,c); }\""
+  },
+  "dependencies": {
+    "lucide-vue-next": "^0.475.0",
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@rollup/wasm-node": "^4.68.5",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.1.0"
+  },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node"
+  }
+}

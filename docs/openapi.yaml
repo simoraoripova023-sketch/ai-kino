@@ -1,0 +1,235 @@
+openapi: 3.1.0
+info:
+  title: AI Kino 2.0 API
+  version: 2.0.0
+  description: Telegram Mini App & Bot backend REST API for AI Kino 2.0 platform.
+servers:
+  - url: /api/v1
+    description: Production API v1
+paths:
+  /auth/telegram:
+    post:
+      summary: Authenticate via Telegram Mini App initData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [init_data]
+              properties:
+                init_data:
+                  type: string
+                  description: Raw Telegram.WebApp.initData query string
+      responses:
+        '200':
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      expires_at:
+                        type: string
+                        format: date-time
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          telegram_id:
+                            type: integer
+                          language:
+                            type: string
+        '401':
+          description: Invalid or expired Telegram signature
+
+  /me:
+    get:
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user data
+
+  /auth/logout:
+    post:
+      summary: Revoke current session token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /genres:
+    get:
+      summary: List all active genres with uz/ru localization
+      responses:
+        '200':
+          description: Genres list
+
+  /works:
+    get:
+      summary: List published AI works with filtering and pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [film, series, short]
+        - name: style
+          in: query
+          schema:
+            type: string
+            enum: [realistic, animation_2d, animation_3d, mixed]
+        - name: genre
+          in: query
+          schema:
+            type: string
+        - name: language
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated works
+
+  /works/{id}:
+    get:
+      summary: Work details, pricing mode, episodes with access status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Work details
+        '404':
+          description: Work not found or unpublished
+
+  /works/{id}/episodes:
+    get:
+      summary: Episodes list for a work
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Episodes list
+
+  /episodes/{id}/play:
+    post:
+      summary: Request playback in Telegram Bot chat
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source:
+                  type: string
+                  default: mini_app
+      responses:
+        '202':
+          description: Video delivery queued to bot chat
+        '403':
+          description: Paywall - episode is locked
+        '409':
+          description: Bot unavailable or not started by user
+
+  /progress:
+    get:
+      summary: List recently watched works to continue
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Watch progress list
+
+  /purchase-intents:
+    post:
+      summary: Create purchase intent for whole work or single episode
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_type:
+                  type: string
+                  enum: [work, episode]
+                target_id:
+                  type: integer
+      responses:
+        '201':
+          description: Intent created with Telegram Stars invoice action
+        '409':
+          description: Already owned
+
+  /purchase-intents/{id}:
+    get:
+      summary: Get purchase intent status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Purchase intent details
+
+  /me/purchases:
+    get:
+      summary: Get user purchases history
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Completed purchases
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
