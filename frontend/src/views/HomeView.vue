@@ -1,7 +1,15 @@
 <template>
   <div class="space-y-6">
+    <!-- Hero / Featured Banner Loading Skeleton -->
+    <div v-if="catalogStore.isHomeLoading && !featuredWork" class="aspect-[16/10] rounded-2xl bg-cinema-900 border border-white/5 animate-pulse flex flex-col justify-end p-4">
+      <div class="h-4 w-24 bg-white/10 rounded mb-2"></div>
+      <div class="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
+      <div class="h-4 w-1/2 bg-white/10 rounded mb-4"></div>
+      <div class="h-9 w-full bg-white/10 rounded-xl"></div>
+    </div>
+
     <!-- Hero / Featured Banner -->
-    <div v-if="featuredWork" class="relative rounded-2xl overflow-hidden aspect-[16/10] bg-cinema-900 border border-white/10 group shadow-2xl">
+    <div v-else-if="featuredWork" class="relative rounded-2xl overflow-hidden aspect-[16/10] bg-cinema-900 border border-white/10 group shadow-2xl">
       <img 
         :src="featuredWork.cover_path || featuredWork.poster_path" 
         :alt="featuredWork.title"
@@ -81,9 +89,27 @@
         </router-link>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
+      <!-- Loading skeleton for cards -->
+      <div v-if="catalogStore.isHomeLoading && catalogStore.homeWorks.length === 0" class="grid grid-cols-2 gap-3">
+        <div v-for="n in 6" :key="n" class="aspect-[2/3] bg-cinema-900 animate-pulse rounded-xl border border-white/5"></div>
+      </div>
+
+      <!-- Error / Empty State -->
+      <div v-else-if="catalogStore.homeWorks.length === 0" class="py-12 text-center text-gray-400 bg-cinema-900/50 rounded-2xl border border-white/5 p-6">
+        <div class="text-3xl mb-2">🎬</div>
+        <p class="text-xs font-semibold mb-3">{{ catalogStore.homeError || t('no_results') }}</p>
+        <button 
+          @click="catalogStore.fetchHomeWorks()" 
+          class="px-4 py-2 rounded-xl bg-cinema-gold text-black font-extrabold text-xs shadow-lg hover:opacity-90 active:scale-95 transition"
+        >
+          {{ t('btn_retry') || 'Qayta urinish' }}
+        </button>
+      </div>
+
+      <!-- Grid Cards -->
+      <div v-else class="grid grid-cols-2 gap-3">
         <router-link
-          v-for="work in catalogStore.works.slice(0, 6)"
+          v-for="work in catalogStore.homeWorks.slice(0, 6)"
           :key="work.id"
           :to="`/work/${work.id}`"
           class="rounded-xl overflow-hidden bg-cinema-900 border border-white/5 flex flex-col group hover:border-cinema-gold/30 transition shadow-lg"
@@ -112,7 +138,7 @@
             </h4>
             <div class="flex items-center justify-between text-[10px] text-gray-400 mt-1">
               <span>{{ work.age_rating }}</span>
-              <span class="capitalize">{{ work.style.replace('_', ' ') }}</span>
+              <span class="capitalize">{{ work.style ? work.style.replace('_', ' ') : '' }}</span>
             </div>
           </div>
         </router-link>
@@ -129,11 +155,11 @@ import { t } from '../i18n'
 const catalogStore = useCatalogStore()
 
 const featuredWork = computed(() => {
-  return catalogStore.works.find(w => w.cover_path) || catalogStore.works[0] || null
+  return catalogStore.homeWorks.find(w => w.cover_path) || catalogStore.homeWorks[0] || null
 })
 
 onMounted(() => {
-  catalogStore.fetchWorks()
+  catalogStore.fetchHomeWorks()
   catalogStore.fetchProgress()
 })
 </script>

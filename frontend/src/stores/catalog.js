@@ -3,12 +3,15 @@ import { ref } from 'vue'
 
 export const useCatalogStore = defineStore('catalog', () => {
   const works = ref([])
+  const homeWorks = ref([])
   const currentWork = ref(null)
   const episodes = ref([])
   const genres = ref([])
   const progressList = ref([])
   const isLoading = ref(false)
+  const isHomeLoading = ref(false)
   const error = ref(null)
+  const homeError = ref(null)
 
   // Filters
   const selectedFormat = ref('')
@@ -25,6 +28,25 @@ export const useCatalogStore = defineStore('catalog', () => {
       }
     } catch (err) {
       console.error('Fetch genres error:', err)
+    }
+  }
+
+  async function fetchHomeWorks() {
+    isHomeLoading.value = true
+    homeError.value = null
+    try {
+      const res = await fetch('/api/v1/works?per_page=12')
+      if (res.ok) {
+        const json = await res.json()
+        homeWorks.value = json.data || []
+      } else {
+        throw new Error('Tavsiya etilgan asarlarni yuklab bo‘lmadi')
+      }
+    } catch (err) {
+      homeError.value = err.message
+      console.error('Fetch home works error:', err)
+    } finally {
+      isHomeLoading.value = false
     }
   }
 
@@ -95,17 +117,21 @@ export const useCatalogStore = defineStore('catalog', () => {
 
   return {
     works,
+    homeWorks,
     currentWork,
     episodes,
     genres,
     progressList,
     isLoading,
+    isHomeLoading,
     error,
+    homeError,
     selectedFormat,
     selectedStyle,
     selectedGenre,
     searchQuery,
     fetchGenres,
+    fetchHomeWorks,
     fetchWorks,
     fetchWorkDetail,
     fetchProgress,

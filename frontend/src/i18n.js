@@ -20,6 +20,7 @@ export const translations = {
     view_all: 'Barchasi',
     free: 'Bepul',
     stars: 'Stars',
+    btn_retry: 'Qayta urinish',
 
     // Catalog
     search_placeholder: 'Film yoki serial qidirish...',
@@ -83,6 +84,7 @@ export const translations = {
     view_all: 'Все',
     free: 'Бесплатно',
     stars: 'Stars',
+    btn_retry: 'Повторить',
 
     // Catalog
     search_placeholder: 'Поиск фильма или сериала...',
