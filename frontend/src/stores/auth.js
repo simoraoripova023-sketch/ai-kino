@@ -22,11 +22,36 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function loginAs(telegramId = 123456789) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await fetch('/api/v1/auth/dev-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegram_id: telegramId }),
+      })
+      if (response.ok) {
+        const res = await response.json()
+        token.value = res.data.token
+        user.value = res.data.user
+        localStorage.setItem('aikino_token', token.value)
+        localStorage.setItem('aikino_user', JSON.stringify(user.value))
+      }
+    } catch (err) {
+      console.error('Dev login error:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function loginWithTelegram() {
     initTelegram()
     if (!rawInitData.value) {
-      // Dev mode fallback
-      console.warn('No Telegram initData found, running in demo/sandbox mode')
+      // Dev mode fallback: auto-login as demo user if no token exists yet
+      if (!token.value) {
+        await loginAs(123456789)
+      }
       return
     }
 
@@ -72,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     initTelegram,
     loginWithTelegram,
+    loginAs,
     logout,
   }
 })

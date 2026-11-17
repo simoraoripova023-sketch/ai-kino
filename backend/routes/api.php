@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // Auth routes
     Route::post('/auth/telegram', [AuthController::class, 'telegramAuth']);
+    Route::post('/auth/dev-login', [AuthController::class, 'devLogin']);
 
     // Catalog routes (public)
     Route::get('/genres', [CatalogController::class, 'genres']);

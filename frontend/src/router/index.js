@@ -4,6 +4,7 @@ import CatalogView from '../views/CatalogView.vue'
 import WorkDetailView from '../views/WorkDetailView.vue'
 import PurchasesView from '../views/PurchasesView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import AdminView from '../views/AdminView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -11,6 +12,7 @@ const routes = [
   { path: '/work/:id', name: 'work-detail', component: WorkDetailView },
   { path: '/purchases', name: 'purchases', component: PurchasesView },
   { path: '/profile', name: 'profile', component: ProfileView },
+  { path: '/admin', name: 'admin', component: AdminView },
 ]
 
 const router = createRouter({

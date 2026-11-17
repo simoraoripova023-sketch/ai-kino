@@ -73,6 +73,7 @@ class AuthController extends Controller
                         'first_name' => $user->first_name,
                         'username' => $user->username,
                         'language' => $user->language,
+                        'is_admin' => (bool) $user->is_admin,
                     ],
                 ],
             ]);
@@ -99,6 +100,7 @@ class AuthController extends Controller
                 'first_name' => $user->first_name,
                 'username' => $user->username,
                 'language' => $user->language,
+                'is_admin' => (bool) $user->is_admin,
             ],
         ]);
     }
@@ -112,6 +114,46 @@ class AuthController extends Controller
         return response()->json([
             'data' => [
                 'message' => 'Muvaffaqiyatli chiqildi',
+            ],
+        ]);
+    }
+
+    /**
+     * Local development login for browser testing without Telegram
+     */
+    public function devLogin(Request $request): JsonResponse
+    {
+        if (!config('app.debug')) {
+            return response()->json(['error' => ['code' => 'FORBIDDEN', 'message' => 'Dev login faqat debug rejimida mavjud']], 403);
+        }
+
+        $tgId = (int) $request->input('telegram_id', 123456789);
+        $user = User::where('telegram_id', $tgId)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'telegram_id' => $tgId,
+                'first_name' => $tgId === 999999999 ? 'AI Kino Admin' : 'Demo Tomoshabin',
+                'username' => $tgId === 999999999 ? 'aikino_admin' : 'demo_viewer',
+                'language' => 'uz',
+                'is_admin' => $tgId === 999999999,
+            ]);
+        }
+
+        $tokenResult = $user->createToken('dev_token');
+
+        return response()->json([
+            'data' => [
+                'token' => $tokenResult->plainTextToken,
+                'expires_at' => now()->addDays(30)->toIso8601String(),
+                'user' => [
+                    'id' => $user->id,
+                    'telegram_id' => $user->telegram_id,
+                    'first_name' => $user->first_name,
+                    'username' => $user->username,
+                    'language' => $user->language,
+                    'is_admin' => (bool) $user->is_admin,
+                ],
             ],
         ]);
     }
