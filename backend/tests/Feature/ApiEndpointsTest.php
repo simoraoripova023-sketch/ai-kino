@@ -18,7 +18,10 @@ class ApiEndpointsTest extends TestCase
     {
         parent::setUp();
         $this->seed();
-        config(['services.telegram.bot_token' => 'dummy_token']);
+        config([
+            'services.telegram.bot_token' => 'dummy_token',
+            'services.telegram.webhook_secret' => '',
+        ]);
     }
 
     public function test_get_genres_returns_active_genres(): void

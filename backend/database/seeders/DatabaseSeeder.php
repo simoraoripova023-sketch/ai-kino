@@ -14,6 +14,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Seed Admin and Demo Users
+        \App\Models\User::firstOrCreate(
+            ['telegram_id' => 999999999],
+            [
+                'first_name' => 'Admin',
+                'username' => 'aikino_admin',
+                'language' => 'uz',
+                'is_admin' => true,
+                'email' => 'admin@aikino.app',
+                'name' => 'AI Kino Administrator',
+            ]
+        );
+
+        \App\Models\User::firstOrCreate(
+            ['telegram_id' => 123456789],
+            [
+                'first_name' => 'Tomoshabin',
+                'username' => 'demo_viewer',
+                'language' => 'uz',
+                'is_admin' => false,
+                'email' => 'viewer@aikino.app',
+                'name' => 'Demo Tomoshabin',
+            ]
+        );
+
         // 1. Seed Genres
         $genres = [
             ['slug' => 'scifi', 'name_uz' => 'Ilmiy fantastika', 'name_ru' => 'Научная фантастика', 'sort_order' => 1],

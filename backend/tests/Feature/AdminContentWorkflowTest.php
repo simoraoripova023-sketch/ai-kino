@@ -21,7 +21,10 @@ class AdminContentWorkflowTest extends TestCase
     {
         parent::setUp();
         $this->seed();
-        config(['services.telegram.bot_token' => 'dummy_token']);
+        config([
+            'services.telegram.bot_token' => 'dummy_token',
+            'services.telegram.webhook_secret' => '',
+        ]);
 
         $this->adminUser = User::create([
             'telegram_id' => 9999999,
