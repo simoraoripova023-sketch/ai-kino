@@ -93,7 +93,66 @@ class TelegramWebhookController extends Controller
                 return response()->json(['ok' => true]);
             }
 
-            // 5. Handle bot messages (e.g. /start)
+            // 5. Handle Video Upload with upload session code
+            if (isset($update['message']['video']) || isset($update['message']['document'])) {
+                $msg = $update['message'];
+                $chatId = $msg['chat']['id'];
+                $caption = trim($msg['caption'] ?? '');
+
+                if (preg_match('/\/upload\s+([a-f0-9\-]+)/i', $caption, $matches)) {
+                    $sessionId = $matches[1];
+                    $session = \App\Models\UploadSession::with('work')
+                        ->where('id', $sessionId)
+                        ->where('status', 'pending')
+                        ->where('expires_at', '>', now())
+                        ->first();
+
+                    if ($session) {
+                        $video = $msg['video'] ?? $msg['document'];
+                        $storageChatId = (int) config('services.telegram.storage_chat_id', -1001234567890);
+                        $botToken = config('services.telegram.bot_token');
+
+                        // Copy video to private storage channel
+                        $copyRes = Http::post("https://api.telegram.org/bot{$botToken}/copyMessage", [
+                            'chat_id' => $storageChatId,
+                            'from_chat_id' => $chatId,
+                            'message_id' => $msg['message_id'],
+                        ]);
+
+                        $storageMessageId = $copyRes->json('result.message_id') ?? $msg['message_id'];
+
+                        // Create new episode
+                        $nextNumber = \App\Models\Episode::where('work_id', $session->work_id)->count() + 1;
+                        $episode = \App\Models\Episode::create([
+                            'work_id' => $session->work_id,
+                            'season_id' => $session->season_id,
+                            'number' => $nextNumber,
+                            'title' => "{$nextNumber}-qism",
+                            'duration_sec' => (int) ($video['duration'] ?? 0),
+                            'file_id' => $video['file_id'],
+                            'file_unique_id' => $video['file_unique_id'] ?? null,
+                            'storage_chat_id' => $storageChatId,
+                            'storage_message_id' => $storageMessageId,
+                            'status' => 'draft',
+                        ]);
+
+                        $session->update([
+                            'status' => 'completed',
+                            'used_at' => now(),
+                        ]);
+
+                        Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                            'chat_id' => $chatId,
+                            'text' => "✅ Video omborga nusxalandi va {$nextNumber}-qism sifatida biriktirildi!\nAsar: {$session->work->title}\nHolat: draft (nashr qilishga tayyor).",
+                        ]);
+
+                        $this->botService->markUpdateProcessed($updateId);
+                        return response()->json(['ok' => true]);
+                    }
+                }
+            }
+
+            // 6. Handle bot messages (e.g. /start)
             if (isset($update['message']['text'])) {
                 $chatId = $update['message']['chat']['id'];
                 $text = trim($update['message']['text']);

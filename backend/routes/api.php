@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminAnalyticsController;
+use App\Http\Controllers\Api\Admin\AdminEpisodeController;
+use App\Http\Controllers\Api\Admin\AdminWorkController;
+use App\Http\Controllers\Api\Admin\UploadSessionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\PaymentController;
@@ -19,7 +23,7 @@ Route::prefix('v1')->group(function () {
     // Webhook route
     Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle']);
 
-    // Authenticated routes
+    // Authenticated user routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -32,5 +36,32 @@ Route::prefix('v1')->group(function () {
         Route::post('/purchase-intents', [PaymentController::class, 'createIntent']);
         Route::get('/purchase-intents/{id}', [PaymentController::class, 'show']);
         Route::get('/me/purchases', [PaymentController::class, 'myPurchases']);
+
+        // Admin routes (RBAC check)
+        Route::middleware('admin')->prefix('admin')->group(function () {
+            // Works management
+            Route::get('/works', [AdminWorkController::class, 'index']);
+            Route::post('/works', [AdminWorkController::class, 'store']);
+            Route::get('/works/{id}', [AdminWorkController::class, 'show']);
+            Route::patch('/works/{id}', [AdminWorkController::class, 'update']);
+            Route::post('/works/{id}/publish', [AdminWorkController::class, 'publish']);
+            Route::post('/works/{id}/hide', [AdminWorkController::class, 'hide']);
+
+            // Episodes management
+            Route::get('/works/{workId}/episodes', [AdminEpisodeController::class, 'index']);
+            Route::post('/works/{workId}/episodes', [AdminEpisodeController::class, 'store']);
+            Route::patch('/episodes/{id}', [AdminEpisodeController::class, 'update']);
+            Route::post('/episodes/{id}/publish', [AdminEpisodeController::class, 'publish']);
+            Route::post('/episodes/{id}/hide', [AdminEpisodeController::class, 'hide']);
+
+            // Upload sessions
+            Route::post('/uploads/sessions', [UploadSessionController::class, 'createSession']);
+            Route::get('/uploads/sessions', [UploadSessionController::class, 'index']);
+
+            // Analytics & Audit
+            Route::get('/analytics/overview', [AdminAnalyticsController::class, 'overview']);
+            Route::get('/payments', [AdminAnalyticsController::class, 'payments']);
+            Route::get('/audit-logs', [AdminAnalyticsController::class, 'auditLogs']);
+        });
     });
 });
