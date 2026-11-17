@@ -215,7 +215,7 @@ class DatabaseSeeder extends Seeder
                 'style' => 'animation_2d',
                 'language' => 'uz',
                 'age_rating' => '0+',
-                'poster_path' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=600&auto=format&fit=crop&q=80',
+                'poster_path' => 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop&q=80',
                 'cover_path' => null,
                 'trailer_file_id' => null,
                 'status' => 'published',

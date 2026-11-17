@@ -72,7 +72,13 @@
         class="rounded-xl overflow-hidden bg-cinema-900 border border-white/5 flex flex-col group hover:border-cinema-gold/30 transition shadow-lg"
       >
         <div class="aspect-[2/3] relative overflow-hidden bg-cinema-800">
-          <img :src="work.poster_path" :alt="work.title" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+          <img 
+            :src="work.poster_path" 
+            :alt="work.title" 
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+            loading="lazy"
+            @error="$event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'"
+          />
           <div class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-black/60 backdrop-blur text-white">
             {{ work.format }}
           </div>

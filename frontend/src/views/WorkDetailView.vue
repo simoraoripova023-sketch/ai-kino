@@ -21,6 +21,7 @@
           :src="catalogStore.currentWork.poster_path"
           :alt="catalogStore.currentWork.title"
           class="w-20 aspect-[2/3] object-cover rounded-lg border-2 border-white/20 shadow-2xl flex-shrink-0"
+          @error="$event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'"
         />
         <div class="flex-1">
           <div class="flex items-center gap-1.5 mb-1 flex-wrap">

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-cinema-950 text-gray-100 max-w-md mx-auto relative shadow-2xl pb-24">
+  <div class="flex flex-col min-h-screen bg-cinema-950 text-gray-100 max-w-md mx-auto relative shadow-2xl pb-32">
     <!-- Top Header -->
     <header class="sticky top-0 z-40 bg-cinema-900/90 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between">
       <router-link to="/" class="flex items-center gap-2">
