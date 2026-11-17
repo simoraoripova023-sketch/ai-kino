@@ -6,7 +6,7 @@
         v-model="catalogStore.searchQuery"
         @input="onSearch"
         type="text"
-        placeholder="Film yoki serial qidirish..."
+        :placeholder="t('search_placeholder')"
         class="w-full bg-cinema-900 border border-white/10 rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cinema-gold/60 transition"
       />
       <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
         class="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition"
         :class="catalogStore.selectedFormat === tab.value ? 'bg-cinema-gold text-black shadow-md shadow-cinema-gold/20' : 'bg-cinema-900 text-gray-400 hover:text-white border border-white/5'"
       >
-        {{ tab.label }}
+        {{ t(tab.key) }}
       </button>
     </div>
 
@@ -41,7 +41,7 @@
         class="px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap border transition"
         :class="!catalogStore.selectedGenre ? 'border-cinema-gold text-cinema-gold bg-cinema-gold/10' : 'border-white/5 text-gray-400 bg-cinema-900'"
       >
-        Barcha janrlar
+        {{ t('all_genres') }}
       </button>
       <button
         v-for="genre in catalogStore.genres"
@@ -50,7 +50,7 @@
         class="px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap border transition"
         :class="catalogStore.selectedGenre === genre.slug ? 'border-cinema-gold text-cinema-gold bg-cinema-gold/10' : 'border-white/5 text-gray-400 bg-cinema-900'"
       >
-        {{ genre.name_uz }}
+        {{ currentLang === 'ru' ? genre.name_ru : genre.name_uz }}
       </button>
     </div>
 
@@ -61,7 +61,7 @@
 
     <div v-else-if="catalogStore.works.length === 0" class="py-16 text-center text-gray-400">
       <div class="text-3xl mb-2">🎬</div>
-      <p class="text-xs font-semibold">Hech qanday AI kino topilmadi</p>
+      <p class="text-xs font-semibold">{{ t('no_results') }}</p>
     </div>
 
     <div v-else class="grid grid-cols-2 gap-3">
@@ -83,7 +83,7 @@
             {{ work.format }}
           </div>
           <div v-if="work.pricing_mode === 'free'" class="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/90 text-white">
-            Bepul
+            {{ t('free') }}
           </div>
           <div v-else class="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/90 text-black flex items-center gap-0.5">
             ⭐ {{ work.price_stars }}
@@ -106,14 +106,15 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useCatalogStore } from '../stores/catalog'
+import { t, currentLang } from '../i18n'
 
 const catalogStore = useCatalogStore()
 
 const formatTabs = [
-  { label: 'Barchasi', value: '' },
-  { label: 'Filmlar', value: 'film' },
-  { label: 'Seriallar', value: 'series' },
-  { label: 'Qisqa metraj', value: 'short' },
+  { key: 'all', value: '' },
+  { key: 'films', value: 'film' },
+  { key: 'series', value: 'series' },
+  { key: 'shorts', value: 'short' },
 ]
 
 function selectFormat(fmt) {

@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <h2 class="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
       <span>⭐</span>
-      Mening xaridlarim
+      {{ t('my_purchases_title') }}
     </h2>
 
     <div v-if="isLoading" class="space-y-3">
@@ -11,12 +11,12 @@
 
     <div v-else-if="purchases.length === 0" class="py-16 text-center text-gray-400 space-y-3">
       <div class="text-4xl">🎟️</div>
-      <p class="text-xs font-semibold">Sizda hali pullik xaridlar mavjud emas</p>
+      <p class="text-xs font-semibold">{{ t('no_purchases') }}</p>
       <router-link
         to="/catalog"
         class="inline-block px-4 py-2 rounded-xl bg-cinema-gold text-black font-extrabold text-xs"
       >
-        Katalogni ko‘rish
+        {{ t('btn_browse_catalog') }}
       </router-link>
     </div>
 
@@ -28,14 +28,14 @@
       >
         <div>
           <div class="text-xs font-bold text-white">
-            {{ p.intent?.target_type === 'work' ? 'To‘liq asar xaridi' : 'Epizod xaridi' }}
+            {{ p.intent?.target_type === 'work' ? t('work_purchase') : t('episode_purchase') }}
           </div>
           <div class="text-[10px] text-gray-400 mt-0.5">
-            {{ new Date(p.paid_at).toLocaleDateString('uz-UZ') }} • ⭐ {{ p.amount_stars }} Stars
+            {{ new Date(p.paid_at).toLocaleDateString(currentLang === 'ru' ? 'ru-RU' : 'uz-UZ') }} • ⭐ {{ p.amount_stars }} Stars
           </div>
         </div>
         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          Faol
+          {{ t('badge_active') }}
         </span>
       </div>
     </div>
@@ -45,6 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { t, currentLang } from '../i18n'
 
 const authStore = useAuthStore()
 const purchases = ref([])

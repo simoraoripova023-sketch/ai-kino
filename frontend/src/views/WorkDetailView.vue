@@ -6,6 +6,7 @@
         :src="catalogStore.currentWork.cover_path || catalogStore.currentWork.poster_path"
         :alt="catalogStore.currentWork.title"
         class="w-full h-full object-cover brightness-75"
+        @error="$event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-cinema-950 via-cinema-950/50 to-transparent"></div>
 
@@ -50,7 +51,7 @@
           :key="g.id"
           class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-cinema-900 border border-white/10 text-cinema-gold"
         >
-          #{{ g.name_uz }}
+          #{{ currentLang === 'ru' ? g.name_ru : g.name_uz }}
         </span>
       </div>
       <p class="text-xs text-gray-300 leading-relaxed">
@@ -65,11 +66,11 @@
     >
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-xs font-bold text-white">To‘liq asarni xarid qilish</div>
-          <div class="text-[10px] text-gray-400">Barcha qismlarni bir marta oching</div>
+          <div class="text-xs font-bold text-white">{{ t('buy_full_work') }}</div>
+          <div class="text-[10px] text-gray-400">{{ t('buy_full_work_sub') }}</div>
         </div>
         <div class="text-sm font-black text-cinema-gold flex items-center gap-1">
-          ⭐ {{ catalogStore.currentWork.price_stars }} Stars
+          ⭐ {{ catalogStore.currentWork.price_stars }} {{ t('stars') }}
         </div>
       </div>
       <button
@@ -77,8 +78,8 @@
         :disabled="isBuying"
         class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cinema-gold to-amber-500 text-black font-black text-xs flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-[0.98] transition shadow-lg shadow-cinema-gold/20"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        <span>{{ isBuying ? 'Hisob yaratilmoqda...' : 'Telegram Stars bilan ochish' }}</span>
+        <svg class="w-4 h-4" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>{{ isBuying ? t('creating_invoice') : t('unlock_with_stars') }}</span>
       </button>
     </div>
 
@@ -92,7 +93,7 @@
     <div class="space-y-3">
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-extrabold text-white uppercase tracking-wide">
-          Qismlar ({{ catalogStore.episodes.length }})
+          {{ t('episodes') }} ({{ catalogStore.episodes.length }})
         </h3>
       </div>
 
@@ -107,12 +108,12 @@
               {{ ep.number }}
             </div>
             <div>
-              <div class="text-xs font-bold text-white">{{ ep.title || (ep.number + '-qism') }}</div>
+              <div class="text-xs font-bold text-white">{{ ep.title || t('episode_num', { n: ep.number }) }}</div>
               <div class="text-[10px] text-gray-400 flex items-center gap-2">
-                <span>{{ Math.round(ep.duration_sec / 60) }} daqiqa</span>
-                <span v-if="ep.access_state === 'free'" class="text-emerald-400 font-semibold">• Bepul</span>
-                <span v-else-if="ep.access_state === 'owned'" class="text-blue-400 font-semibold">• Ochilgan</span>
-                <span v-else class="text-amber-400 font-semibold">• ⭐ {{ ep.price_stars }} Stars</span>
+                <span>{{ Math.round(ep.duration_sec / 60) }} {{ t('minutes') }}</span>
+                <span v-if="ep.access_state === 'free'" class="text-emerald-400 font-semibold">• {{ t('status_free') }}</span>
+                <span v-else-if="ep.access_state === 'owned'" class="text-blue-400 font-semibold">• {{ t('status_owned') }}</span>
+                <span v-else class="text-amber-400 font-semibold">• ⭐ {{ ep.price_stars }} {{ t('stars') }}</span>
               </div>
             </div>
           </div>
@@ -125,8 +126,8 @@
               :disabled="isPlaying"
               class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 active:scale-95 transition shadow-md shadow-emerald-500/20"
             >
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <span>Ko‘rish</span>
+              <svg class="w-3.5 h-3.5" width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span>{{ t('btn_watch') }}</span>
             </button>
 
             <button
@@ -135,8 +136,8 @@
               :disabled="isBuying"
               class="px-3 py-1.5 rounded-lg bg-cinema-gold hover:bg-amber-400 text-black font-extrabold text-xs flex items-center gap-1 active:scale-95 transition shadow-md shadow-cinema-gold/20"
             >
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10a2 2 0 012-2h1V6a5 5 0 0110 0v2h1zm-6-5a3 3 0 00-3 3v2h6V6a3 3 0 00-3-3z"/></svg>
-              <span>Ochish</span>
+              <svg class="w-3.5 h-3.5" width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10a2 2 0 012-2h1V6a5 5 0 0110 0v2h1zm-6-5a3 3 0 00-3 3v2h6V6a3 3 0 00-3-3z"/></svg>
+              <span>{{ t('btn_unlock') }}</span>
             </button>
           </div>
         </div>
@@ -150,6 +151,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCatalogStore } from '../stores/catalog'
 import { useAuthStore } from '../stores/auth'
+import { t, currentLang } from '../i18n'
 
 const route = useRoute()
 const catalogStore = useCatalogStore()
@@ -177,8 +179,7 @@ async function playEpisode(id) {
     })
     const json = await res.json()
     if (res.ok) {
-      toastMessage.value = '🎬 Video bot chatiga yuborildi! Telegram chatiga o‘ting.'
-      // Trigger native Telegram haptic if available
+      toastMessage.value = t('video_sent_toast')
       window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success')
     } else {
       toastMessage.value = json.error?.message || 'Xatolik yuz berdi'
@@ -208,7 +209,7 @@ async function buyTarget(targetType, targetId) {
     })
     const json = await res.json()
     if (res.ok) {
-      toastMessage.value = '⭐ To‘lov hisobi Telegram bot chatiga yuborildi!'
+      toastMessage.value = t('invoice_sent_toast')
       window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium')
     } else {
       toastMessage.value = json.error?.message || 'To‘lov yaratishda xatolik'

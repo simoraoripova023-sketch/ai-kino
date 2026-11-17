@@ -15,7 +15,7 @@
         <router-link to="/catalog" class="p-2 rounded-full hover:bg-white/5 text-gray-400 hover:text-white transition">
           <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </router-link>
-        <button @click="toggleLang" class="px-2 py-1 text-xs font-bold rounded border border-white/10 hover:border-cinema-gold/40 text-cinema-gold">
+        <button @click="toggleLanguage" class="px-2 py-1 text-xs font-bold rounded border border-white/10 hover:border-cinema-gold/40 text-cinema-gold">
           {{ currentLang.toUpperCase() }}
         </button>
       </div>
@@ -68,35 +68,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
+import { t, currentLang, toggleLanguage } from './i18n'
 
 const authStore = useAuthStore()
-const currentLang = ref(localStorage.getItem('aikino_lang') || 'uz')
-
-const translations = {
-  uz: {
-    home: 'Asosiy',
-    catalog: 'Katalog',
-    purchases: 'Xaridlar',
-    profile: 'Profil',
-  },
-  ru: {
-    home: 'Главная',
-    catalog: 'Каталог',
-    purchases: 'Покупки',
-    profile: 'Профиль',
-  }
-}
-
-function t(key) {
-  return translations[currentLang.value]?.[key] || key
-}
-
-function toggleLang() {
-  currentLang.value = currentLang.value === 'uz' ? 'ru' : 'uz'
-  localStorage.setItem('aikino_lang', currentLang.value)
-}
 
 onMounted(() => {
   authStore.loginWithTelegram()
