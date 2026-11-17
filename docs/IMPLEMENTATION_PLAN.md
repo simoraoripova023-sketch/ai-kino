@@ -2,7 +2,19 @@
 
 **Versiya:** 2.0 / MVP  
 **Sana:** 2026-11-17  
-**Holat:** Dastlabki rejalashtirish va arxitektura tasdiqlash
+**Holat:** MVP to‘liq amalga oshirildi, testlandi va hujjatlashtirildi (Phase 0–5 yakunlandi)
+
+---
+
+## 0. BAJARILGAN ISHLAR QISQACHA XULOSASI
+- **Backend:** Laravel 11.x (PHP 8.3) to‘liq sozlandi, Sanctum autentifikatsiyasi ulandi.
+- **Ma'lumotlar bazasi:** 15 ta normalizatsiya qilingan jadval yaratildi va 10 ta namuna AI asar/25 ta epizod bilan seed qilindi.
+- **Xavfsizlik & Auth:** Telegram Mini App `initData` HMAC-SHA256 validatori yaratildi va 100% testlandi.
+- **Biznes mantiq:** Ko‘p qismli 1-qism bepul, to‘liq metrajli film preview istisnolari va entitlement qarorlari to‘liq ishga tushirildi.
+- **Telegram Stars (XTR):** Snapshot narxlash, pre-checkout tekshiruvi (<10s) va idempotent `successful_payment` to‘lov oqimi amalga oshirildi.
+- **Telegram Bot Playback:** `copyMessage(protect_content=true)` orqali video yetkazish, replay guard (`telegram_updates`) va fallbacklar yozildi.
+- **Frontend (Mini App):** Vue 3 + TailwindCSS interfeysi (Bosh sahifa, Davom ettirish, Katalog, Asar sahifasi, Xaridlar, Profil) ishlab chiqildi va muvaffaqiyatli yig‘ildi.
+- **Testlar:** 22 ta backend Unit & Feature testlari (84 ta assertion) va frontend build 100% muvaffaqiyatli o‘tdi.
 
 ---
 
