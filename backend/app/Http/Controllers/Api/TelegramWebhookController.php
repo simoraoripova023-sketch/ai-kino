@@ -159,7 +159,7 @@ class TelegramWebhookController extends Controller
                 $from = $update['message']['from'];
 
                 // Register/update user
-                User::updateOrCreate(
+                $user = User::updateOrCreate(
                     ['telegram_id' => $from['id']],
                     [
                         'first_name' => $from['first_name'] ?? 'User',
@@ -170,6 +170,15 @@ class TelegramWebhookController extends Controller
                 );
 
                 if (str_starts_with($text, '/start')) {
+                    // Check if referral code is present in /start ref_...
+                    if (preg_match('/\/start\s+(ref[_-][a-zA-Z0-9]+)/i', $text, $matches)) {
+                        try {
+                            app(\App\Services\ReferralService::class)->processReferral($user, $matches[1]);
+                        } catch (\Throwable $e) {
+                            Log::warning('Referral webhook processing error: ' . $e->getMessage());
+                        }
+                    }
+
                     $botToken = config('services.telegram.bot_token');
                     $miniAppUrl = config('services.telegram.mini_app_url', 'https://aikino.app');
 

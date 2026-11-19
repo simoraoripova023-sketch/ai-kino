@@ -8,6 +8,7 @@ export const translations = {
     // Nav
     home: 'Asosiy',
     catalog: 'Katalog',
+    friends: 'Do‘stlar',
     purchases: 'Xaridlar',
     profile: 'Profil',
 
@@ -132,6 +133,7 @@ export const translations = {
     // Nav
     home: 'Главная',
     catalog: 'Каталог',
+    friends: 'Друзья',
     purchases: 'Покупки',
     profile: 'Профиль',
 

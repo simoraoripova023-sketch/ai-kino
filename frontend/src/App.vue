@@ -89,6 +89,18 @@
         </router-link>
 
         <router-link 
+          to="/referral" 
+          class="flex flex-col items-center gap-1 transition relative"
+          :class="$route.path === '/referral' ? 'text-cinema-gold font-semibold' : 'text-gray-400 hover:text-gray-200'"
+        >
+          <div class="relative">
+            <svg class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+            <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          </div>
+          <span class="text-[10px]">{{ t('friends') }}</span>
+        </router-link>
+
+        <router-link 
           to="/purchases" 
           class="flex flex-col items-center gap-1 transition"
           :class="$route.path === '/purchases' ? 'text-cinema-gold font-semibold' : 'text-gray-400 hover:text-gray-200'"

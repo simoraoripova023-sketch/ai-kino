@@ -58,10 +58,16 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = null
     try {
+      const tg = window.Telegram?.WebApp
+      const startParam = tg?.initDataUnsafe?.start_param || null
+
       const response = await fetch('/api/v1/auth/telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ init_data: rawInitData.value }),
+        body: JSON.stringify({
+          init_data: rawInitData.value,
+          start_param: startParam,
+        }),
       })
 
       if (!response.ok) {

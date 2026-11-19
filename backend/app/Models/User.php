@@ -22,7 +22,44 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'referral_code',
+        'referrer_id',
+        'bonus_stars',
+        'referrals_count',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->referral_code)) {
+                $user->referral_code = strtoupper(\Illuminate\Support\Str::random(8));
+            }
+        });
+    }
+
+    public function ensureReferralCode(): string
+    {
+        if (empty($this->referral_code)) {
+            $this->referral_code = strtoupper(\Illuminate\Support\Str::random(8));
+            $this->save();
+        }
+        return $this->referral_code;
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referrer_id');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referrer_id');
+    }
+
+    public function referralRewards()
+    {
+        return $this->hasMany(ReferralLog::class, 'referrer_id');
+    }
 
     protected $hidden = [
         'password',

@@ -20,6 +20,24 @@
       </div>
     </div>
 
+    <!-- Referral Banner -->
+    <router-link to="/referral" class="block p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-900/30 to-cinema-900 border border-amber-500/30 hover:border-amber-500/50 transition shadow-lg active:scale-98">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🎁</span>
+          <div>
+            <h4 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+              Do'stlarni taklif qilish <span class="text-amber-400">⭐️</span>
+            </h4>
+            <p class="text-[10px] text-amber-200/80">Har bir taklif uchun +5 Stars sovg'a oling!</p>
+          </div>
+        </div>
+        <span class="text-xs font-bold text-amber-400 bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30">
+          Ochish &rarr;
+        </span>
+      </div>
+    </router-link>
+
     <!-- Admin Link (if is_admin) -->
     <div v-if="authStore.user?.is_admin" class="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-cinema-900 to-cinema-900 border border-cinema-gold/40 flex items-center justify-between">
       <div>

@@ -39,6 +39,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/purchase-intents/{id}/simulate-pay', [PaymentController::class, 'simulatePay']);
         Route::get('/me/purchases', [PaymentController::class, 'myPurchases']);
 
+        // Referrals & Rewards
+        Route::get('/referrals/stats', [\App\Http\Controllers\Api\ReferralController::class, 'stats']);
+        Route::post('/referrals/claim', [\App\Http\Controllers\Api\ReferralController::class, 'claim']);
+
         // Admin routes (RBAC check)
         Route::middleware('admin')->prefix('admin')->group(function () {
             // Works management

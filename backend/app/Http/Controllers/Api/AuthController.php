@@ -12,10 +12,12 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     protected TelegramInitDataValidator $validator;
+    protected \App\Services\ReferralService $referralService;
 
-    public function __construct(TelegramInitDataValidator $validator)
+    public function __construct(TelegramInitDataValidator $validator, \App\Services\ReferralService $referralService)
     {
         $this->validator = $validator;
+        $this->referralService = $referralService;
     }
 
     /**
@@ -25,6 +27,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'init_data' => 'required|string',
+            'start_param' => 'nullable|string|max:64',
         ]);
 
         try {
@@ -60,6 +63,13 @@ class AuthController extends Controller
                 ], 403);
             }
 
+            // Check and process referral if provided
+            $startParam = $request->input('start_param') ?? ($validated['start_param'] ?? null);
+            if ($startParam && !$user->referrer_id && preg_match('/^ref[_-]/i', $startParam)) {
+                $this->referralService->processReferral($user, $startParam);
+                $user->refresh();
+            }
+
             // Create Sanctum personal access token
             $tokenResult = $user->createToken('telegram_mini_app');
 
@@ -74,6 +84,9 @@ class AuthController extends Controller
                         'username' => $user->username,
                         'language' => $user->language,
                         'is_admin' => (bool) $user->is_admin,
+                        'referral_code' => $user->ensureReferralCode(),
+                        'referrals_count' => (int) $user->referrals_count,
+                        'bonus_stars' => (int) $user->bonus_stars,
                     ],
                 ],
             ]);
@@ -101,6 +114,9 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'language' => $user->language,
                 'is_admin' => (bool) $user->is_admin,
+                'referral_code' => $user->ensureReferralCode(),
+                'referrals_count' => (int) $user->referrals_count,
+                'bonus_stars' => (int) $user->bonus_stars,
             ],
         ]);
     }
@@ -153,6 +169,9 @@ class AuthController extends Controller
                     'username' => $user->username,
                     'language' => $user->language,
                     'is_admin' => (bool) $user->is_admin,
+                    'referral_code' => $user->ensureReferralCode(),
+                    'referrals_count' => (int) $user->referrals_count,
+                    'bonus_stars' => (int) $user->bonus_stars,
                 ],
             ],
         ]);
