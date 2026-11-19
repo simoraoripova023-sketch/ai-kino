@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/works', [AdminWorkController::class, 'store']);
             Route::get('/works/{id}', [AdminWorkController::class, 'show']);
             Route::patch('/works/{id}', [AdminWorkController::class, 'update']);
+            Route::delete('/works/{id}', [AdminWorkController::class, 'destroy']);
             Route::post('/works/{id}/publish', [AdminWorkController::class, 'publish']);
             Route::post('/works/{id}/hide', [AdminWorkController::class, 'hide']);
 
@@ -53,6 +54,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/works/{workId}/episodes', [AdminEpisodeController::class, 'index']);
             Route::post('/works/{workId}/episodes', [AdminEpisodeController::class, 'store']);
             Route::patch('/episodes/{id}', [AdminEpisodeController::class, 'update']);
+            Route::delete('/episodes/{id}', [AdminEpisodeController::class, 'destroy']);
             Route::post('/episodes/{id}/publish', [AdminEpisodeController::class, 'publish']);
             Route::post('/episodes/{id}/hide', [AdminEpisodeController::class, 'hide']);
 

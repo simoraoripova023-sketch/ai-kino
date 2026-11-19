@@ -7,7 +7,7 @@
         @input="onSearch"
         type="text"
         :placeholder="t('search_placeholder')"
-        class="w-full bg-cinema-900 border border-white/10 rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cinema-gold/60 transition"
+        class="w-full bg-cinema-900 border border-white/10 rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cinema-gold/60 transition shadow-inner"
       />
       <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -21,13 +21,13 @@
       </button>
     </div>
 
-    <!-- Format Tabs -->
+    <!-- Format Tabs (Film / Series / Short) -->
     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
       <button
         v-for="tab in formatTabs"
         :key="tab.value"
         @click="selectFormat(tab.value)"
-        class="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition"
+        class="px-3.5 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition"
         :class="catalogStore.selectedFormat === tab.value ? 'bg-cinema-gold text-black shadow-md shadow-cinema-gold/20' : 'bg-cinema-900 text-gray-400 hover:text-white border border-white/5'"
       >
         {{ t(tab.key) }}
@@ -54,14 +54,61 @@
       </button>
     </div>
 
-    <!-- Works Grid -->
-    <div v-if="catalogStore.isLoading" class="grid grid-cols-2 gap-3">
-      <div v-for="n in 4" :key="n" class="aspect-[2/3] bg-cinema-900 animate-pulse rounded-xl"></div>
+    <!-- Style and Age Rating Controls -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+      <!-- Sort Selector Dropdown -->
+      <select 
+        v-model="catalogStore.selectedSort" 
+        @change="catalogStore.fetchWorks()"
+        class="bg-cinema-900 border border-white/10 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-cinema-gold font-bold"
+      >
+        <option value="newest">🕒 {{ t('sort_newest') }}</option>
+        <option value="stars_asc">⭐ {{ t('sort_stars_asc') }}</option>
+        <option value="stars_desc">⭐ {{ t('sort_stars_desc') }}</option>
+        <option value="title">🔤 {{ t('sort_title') }}</option>
+      </select>
+
+      <!-- Style Filter -->
+      <select 
+        v-model="catalogStore.selectedStyle" 
+        @change="catalogStore.fetchWorks()"
+        class="bg-cinema-900 border border-white/10 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-cinema-gold font-medium"
+      >
+        <option value="">🎨 {{ t('style_all') }}</option>
+        <option value="realistic">{{ t('style_realistic') }}</option>
+        <option value="animation_2d">{{ t('style_animation_2d') }}</option>
+        <option value="animation_3d">{{ t('style_animation_3d') }}</option>
+        <option value="mixed">{{ t('style_mixed') }}</option>
+      </select>
+
+      <!-- Age Rating Filter -->
+      <select 
+        v-model="catalogStore.selectedAgeRating" 
+        @change="catalogStore.fetchWorks()"
+        class="bg-cinema-900 border border-white/10 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-cinema-gold font-medium"
+      >
+        <option value="">🔞 {{ t('filter_age') }}: Barchasi</option>
+        <option value="0+">0+</option>
+        <option value="6+">6+</option>
+        <option value="12+">12+</option>
+        <option value="16+">16+</option>
+      </select>
     </div>
 
-    <div v-else-if="catalogStore.works.length === 0" class="py-16 text-center text-gray-400">
+    <!-- Works Grid -->
+    <div v-if="catalogStore.isLoading" class="grid grid-cols-2 gap-3">
+      <div v-for="n in 6" :key="n" class="aspect-[2/3] bg-cinema-900 animate-pulse rounded-xl border border-white/5"></div>
+    </div>
+
+    <div v-else-if="catalogStore.works.length === 0" class="py-16 text-center text-gray-400 bg-cinema-900/40 rounded-2xl border border-white/5 p-6">
       <div class="text-3xl mb-2">🎬</div>
-      <p class="text-xs font-semibold">{{ t('no_results') }}</p>
+      <p class="text-xs font-semibold mb-3">{{ t('no_results') }}</p>
+      <button 
+        @click="resetAllFilters"
+        class="px-3.5 py-1.5 rounded-xl bg-cinema-800 hover:bg-cinema-700 text-cinema-gold font-bold text-xs transition"
+      >
+        Filtrlarni tozalash
+      </button>
     </div>
 
     <div v-else class="grid grid-cols-2 gap-3">
@@ -95,7 +142,7 @@
           </h4>
           <div class="flex items-center justify-between text-[10px] text-gray-400 mt-1">
             <span>{{ work.age_rating }}</span>
-            <span class="capitalize">{{ work.style.replace('_', ' ') }}</span>
+            <span class="capitalize">{{ work.style?.replace('_', ' ') }}</span>
           </div>
         </div>
       </router-link>
@@ -124,6 +171,17 @@ function selectFormat(fmt) {
 
 function selectGenre(slug) {
   catalogStore.selectedGenre = slug
+  catalogStore.fetchWorks()
+}
+
+function resetAllFilters() {
+  catalogStore.selectedFormat = ''
+  catalogStore.selectedStyle = ''
+  catalogStore.selectedGenre = ''
+  catalogStore.selectedAgeRating = ''
+  catalogStore.selectedPricingMode = ''
+  catalogStore.selectedSort = 'newest'
+  catalogStore.searchQuery = ''
   catalogStore.fetchWorks()
 }
 

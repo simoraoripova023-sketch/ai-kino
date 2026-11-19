@@ -230,4 +230,34 @@ class AdminWorkController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Delete work and its relationships
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $work = Work::findOrFail($id);
+        $oldValues = $work->toArray();
+
+        // Delete episodes and detach genres
+        $work->genres()->detach();
+        $work->episodes()->delete();
+        $work->delete();
+
+        AdminAuditLog::create([
+            'actor_id' => $request->user()->id,
+            'action' => 'work_deleted',
+            'entity_type' => 'work',
+            'entity_id' => $id,
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'created_at' => now(),
+        ]);
+
+        return response()->json([
+            'data' => [
+                'message' => 'Asar muvaffaqiyatli o‘chirildi',
+            ],
+        ]);
+    }
 }

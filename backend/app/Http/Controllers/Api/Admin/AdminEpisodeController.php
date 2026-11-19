@@ -113,4 +113,27 @@ class AdminEpisodeController extends Controller
 
         return response()->json(['data' => ['message' => 'Epizod yashirildi', 'episode' => $episode]]);
     }
+
+    /**
+     * Delete episode
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $episode = Episode::findOrFail($id);
+        $oldValues = $episode->toArray();
+
+        $episode->delete();
+
+        AdminAuditLog::create([
+            'actor_id' => $request->user()->id,
+            'action' => 'episode_deleted',
+            'entity_type' => 'episode',
+            'entity_id' => $id,
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'created_at' => now(),
+        ]);
+
+        return response()->json(['data' => ['message' => 'Epizod muvaffaqiyatli o‘chirildi']]);
+    }
 }

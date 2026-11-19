@@ -61,6 +61,16 @@ class CatalogController extends Controller
             });
         }
 
+        // Age rating filter (0+, 6+, 12+, 16+)
+        if ($request->filled('age_rating')) {
+            $query->where('age_rating', $request->input('age_rating'));
+        }
+
+        // Pricing mode filter (free, work, episode)
+        if ($request->filled('pricing_mode')) {
+            $query->where('pricing_mode', $request->input('pricing_mode'));
+        }
+
         // Search query
         if ($request->filled('q')) {
             $search = '%' . $request->input('q') . '%';
@@ -70,8 +80,20 @@ class CatalogController extends Controller
             });
         }
 
+        // Sorting
+        $sort = $request->input('sort', 'newest');
+        if ($sort === 'stars_asc') {
+            $query->orderBy('price_stars', 'asc');
+        } elseif ($sort === 'stars_desc') {
+            $query->orderBy('price_stars', 'desc');
+        } elseif ($sort === 'title') {
+            $query->orderBy('title', 'asc');
+        } else {
+            $query->latest('published_at');
+        }
+
         $perPage = min((int) $request->input('per_page', 20), 50);
-        $works = $query->latest('published_at')->paginate($perPage);
+        $works = $query->paginate($perPage);
 
         return response()->json([
             'data' => $works->items(),

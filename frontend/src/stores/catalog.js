@@ -17,6 +17,9 @@ export const useCatalogStore = defineStore('catalog', () => {
   const selectedFormat = ref('')
   const selectedStyle = ref('')
   const selectedGenre = ref('')
+  const selectedAgeRating = ref('')
+  const selectedPricingMode = ref('')
+  const selectedSort = ref('newest')
   const searchQuery = ref('')
 
   async function fetchGenres() {
@@ -58,6 +61,9 @@ export const useCatalogStore = defineStore('catalog', () => {
       if (selectedFormat.value) params.append('format', selectedFormat.value)
       if (selectedStyle.value) params.append('style', selectedStyle.value)
       if (selectedGenre.value) params.append('genre', selectedGenre.value)
+      if (selectedAgeRating.value) params.append('age_rating', selectedAgeRating.value)
+      if (selectedPricingMode.value) params.append('pricing_mode', selectedPricingMode.value)
+      if (selectedSort.value) params.append('sort', selectedSort.value)
       if (searchQuery.value) params.append('q', searchQuery.value)
 
       const res = await fetch(`/api/v1/works?${params.toString()}`)
@@ -129,6 +135,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     selectedFormat,
     selectedStyle,
     selectedGenre,
+    selectedAgeRating,
+    selectedPricingMode,
+    selectedSort,
     searchQuery,
     fetchGenres,
     fetchHomeWorks,
