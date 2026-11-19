@@ -107,8 +107,8 @@
                 <div class="text-xs font-black text-white truncate">{{ work.title }}</div>
                 <div class="text-[10px] text-gray-400 flex items-center gap-1.5 flex-wrap mt-0.5">
                   <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-white/10 text-white">{{ work.format }}</span>
-                  <span class="text-amber-400" v-if="work.pricing_mode !== 'free'">⭐ {{ work.price_stars }}</span>
-                  <span class="text-emerald-400" v-else>{{ t('free') }}</span>
+                  <span class="text-amber-400 font-bold" v-if="work.pricing_mode !== 'free'">⭐ {{ work.price_stars || 0 }} Stars</span>
+                  <span class="text-emerald-400 font-bold" v-else>🟢 {{ t('free') }}</span>
                   <span class="text-gray-400">• {{ work.episodes?.length || 0 }} {{ t('episodes') }}</span>
                 </div>
                 <div class="mt-1">
@@ -145,7 +145,7 @@
               @click="openEpisodesModal(work)" 
               class="flex-1 py-1 rounded-lg bg-cinema-800 hover:bg-cinema-700 text-cinema-gold font-bold transition flex items-center justify-center gap-1"
             >
-              <span>🎞️</span> {{ t('tab_episodes') }} ({{ work.episodes?.length || 0 }})
+              <span>🎞️</span> {{ t('episodes') }} ({{ work.episodes?.length || 0 }})
             </button>
             <button 
               @click="openEditModal(work)" 
@@ -249,9 +249,9 @@
             <div>
               <label class="block text-gray-400 text-[10px] mb-1 font-bold">{{ t('field_pricing') }}</label>
               <select v-model="workForm.pricing_mode" class="w-full px-3 py-2 rounded-xl bg-cinema-950 border border-white/10 text-white text-xs">
-                <option value="free">Free</option>
-                <option value="work">Full Work</option>
-                <option value="episode">Per Episode</option>
+                <option value="free">Bepul (Free)</option>
+                <option value="work">Pullik - Butun asar (Full Work)</option>
+                <option value="episode">Pullik - Har bir qism (Per Episode)</option>
               </select>
             </div>
             <div>
