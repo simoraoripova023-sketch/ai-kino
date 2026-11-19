@@ -218,6 +218,7 @@ const activeEpisode = ref(null)
 const botLink = ref('')
 
 const isWholeWorkOwned = computed(() => {
+  if (authStore.user?.is_admin) return true
   return catalogStore.episodes.length > 0 && catalogStore.episodes.every(ep => ep.access_state === 'owned')
 })
 

@@ -20,6 +20,17 @@ class EntitlementService
     {
         $work = $episode->work ?? Work::find($episode->work_id);
 
+        // 0. Admin user always has full free access to view and play everything
+        if ($user && $user->is_admin) {
+            return [
+                'accessible' => true,
+                'access_state' => 'owned',
+                'price_stars' => 0,
+                'target_type' => null,
+                'target_id' => null,
+            ];
+        }
+
         // 1. Check publish status
         if ($work->status !== 'published' || ($work->published_at && $work->published_at->isFuture())) {
             return [

@@ -374,8 +374,8 @@ const workForm = ref({
   language: 'uz',
   age_rating: '12+',
   poster_path: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80',
-  pricing_mode: 'work',
-  price_stars: 25,
+  pricing_mode: 'free',
+  price_stars: 0,
 })
 
 const newEpisodeForm = ref({
