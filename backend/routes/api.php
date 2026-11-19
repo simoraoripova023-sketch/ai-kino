@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
         // Payments & Purchases
         Route::post('/purchase-intents', [PaymentController::class, 'createIntent']);
         Route::get('/purchase-intents/{id}', [PaymentController::class, 'show']);
+        Route::post('/purchase-intents/{id}/simulate-pay', [PaymentController::class, 'simulatePay']);
         Route::get('/me/purchases', [PaymentController::class, 'myPurchases']);
 
         // Admin routes (RBAC check)

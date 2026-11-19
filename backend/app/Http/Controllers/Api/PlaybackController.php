@@ -101,11 +101,21 @@ class PlaybackController extends Controller
             'request_id' => $requestId,
         ]);
 
+        $botUsername = config('services.telegram.bot_username', 'aikino_bot');
+
         return response()->json([
             'data' => [
                 'status' => 'delivered',
                 'request_id' => $requestId,
                 'message' => 'Video Telegram bot chatiga yuborildi',
+                'telegram_message_id' => $delivery['result']['message_id'] ?? null,
+                'bot_link' => "https://t.me/{$botUsername}",
+                'video_url' => $episode->video_url,
+                'episode' => [
+                    'id' => $episode->id,
+                    'number' => $episode->number,
+                    'title' => $episode->title,
+                ],
             ],
         ], 202);
     }

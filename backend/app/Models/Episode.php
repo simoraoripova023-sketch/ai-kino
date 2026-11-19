@@ -25,6 +25,10 @@ class Episode extends Model
         'price_stars',
     ];
 
+    protected $appends = [
+        'video_url',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -35,6 +39,12 @@ class Episode extends Model
             'price_stars' => 'integer',
             'publish_at' => 'datetime',
         ];
+    }
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        // High quality web mp4 sample for instant in-app web player playback
+        return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
     }
 
     public function work()

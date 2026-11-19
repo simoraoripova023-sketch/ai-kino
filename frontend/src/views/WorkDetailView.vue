@@ -33,13 +33,52 @@
               {{ catalogStore.currentWork.age_rating }}
             </span>
             <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-white/5 text-gray-300 capitalize">
-              {{ catalogStore.currentWork.style.replace('_', ' ') }}
+              {{ catalogStore.currentWork.style?.replace('_', ' ') }}
             </span>
           </div>
           <h1 class="text-lg font-black text-white leading-tight">
             {{ catalogStore.currentWork.title }}
           </h1>
         </div>
+      </div>
+    </div>
+
+    <!-- In-App Video Player Section (Modal or Inline) -->
+    <div v-if="activeEpisode" class="p-4 rounded-2xl bg-cinema-900 border border-cinema-gold/40 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h3 class="text-xs font-black text-white">
+            {{ activeEpisode.title || t('episode_num', { n: activeEpisode.number }) }}
+          </h3>
+        </div>
+        <button @click="activeEpisode = null" class="text-xs text-gray-400 hover:text-white px-2 py-0.5 rounded bg-white/5">
+          ✕ {{ t('close_player') }}
+        </button>
+      </div>
+
+      <div class="relative rounded-xl overflow-hidden aspect-video bg-black">
+        <video 
+          controls 
+          autoplay 
+          playsinline 
+          class="w-full h-full object-contain"
+          :src="activeEpisode.video_url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'"
+        ></video>
+      </div>
+
+      <div class="flex items-center justify-between text-[11px] pt-1">
+        <span class="text-gray-400 flex items-center gap-1">
+          <span>🛡️</span> {{ t('badge_active') }} (1080p AI Video)
+        </span>
+        <a 
+          v-if="botLink" 
+          :href="botLink" 
+          target="_blank" 
+          class="px-2.5 py-1 rounded-lg bg-cinema-800 hover:bg-cinema-700 text-cinema-gold font-bold transition flex items-center gap-1"
+        >
+          <span>✈️</span> {{ t('open_in_bot') }}
+        </a>
       </div>
     </div>
 
@@ -84,9 +123,22 @@
     </div>
 
     <!-- Notice Box / Toast Message -->
-    <div v-if="toastMessage" class="p-3 rounded-xl bg-cinema-800 border border-cinema-gold/40 text-xs font-medium text-cinema-gold flex items-center justify-between animate-fade-in">
-      <span>{{ toastMessage }}</span>
-      <button @click="toastMessage = ''" class="text-white ml-2">&times;</button>
+    <div v-if="toastMessage" class="p-3 rounded-xl bg-cinema-800 border border-cinema-gold/40 text-xs font-medium text-cinema-gold space-y-2 animate-fade-in">
+      <div class="flex items-center justify-between">
+        <span>{{ toastMessage }}</span>
+        <button @click="toastMessage = ''" class="text-white ml-2">&times;</button>
+      </div>
+
+      <!-- Sandbox simulated payment trigger if intent is pending -->
+      <div v-if="pendingIntentId" class="pt-1 flex gap-2">
+        <button 
+          @click="simulatePayment" 
+          :disabled="isSimulating"
+          class="w-full py-1.5 rounded-lg bg-cinema-gold text-black font-extrabold text-[11px] shadow hover:opacity-90 active:scale-95 transition"
+        >
+          {{ isSimulating ? '...' : t('simulate_pay_btn') }}
+        </button>
+      </div>
     </div>
 
     <!-- Episodes List -->
@@ -122,7 +174,7 @@
           <div>
             <button
               v-if="ep.access_state === 'free' || ep.access_state === 'owned'"
-              @click="playEpisode(ep.id)"
+              @click="playEpisode(ep)"
               :disabled="isPlaying"
               class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 active:scale-95 transition shadow-md shadow-emerald-500/20"
             >
@@ -159,18 +211,22 @@ const authStore = useAuthStore()
 
 const isPlaying = ref(false)
 const isBuying = ref(false)
+const isSimulating = ref(false)
 const toastMessage = ref('')
+const pendingIntentId = ref(null)
+const activeEpisode = ref(null)
+const botLink = ref('')
 
 const isWholeWorkOwned = computed(() => {
   return catalogStore.episodes.length > 0 && catalogStore.episodes.every(ep => ep.access_state === 'owned')
 })
 
-async function playEpisode(id) {
+async function playEpisode(ep) {
   isPlaying.value = true
   toastMessage.value = ''
   try {
     const token = authStore.token || localStorage.getItem('aikino_token')
-    const res = await fetch(`/api/v1/episodes/${id}/play`, {
+    const res = await fetch(`/api/v1/episodes/${ep.id}/play`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -179,6 +235,11 @@ async function playEpisode(id) {
     })
     const json = await res.json()
     if (res.ok) {
+      activeEpisode.value = {
+        ...ep,
+        video_url: json.data?.video_url || ep.video_url,
+      }
+      botLink.value = json.data?.bot_link || ''
       toastMessage.value = t('video_sent_toast')
       window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success')
     } else {
@@ -194,6 +255,7 @@ async function playEpisode(id) {
 async function buyTarget(targetType, targetId) {
   isBuying.value = true
   toastMessage.value = ''
+  pendingIntentId.value = null
   try {
     const token = authStore.token || localStorage.getItem('aikino_token')
     const res = await fetch('/api/v1/purchase-intents', {
@@ -209,7 +271,20 @@ async function buyTarget(targetType, targetId) {
     })
     const json = await res.json()
     if (res.ok) {
-      toastMessage.value = t('invoice_sent_toast')
+      pendingIntentId.value = json.data.intent_id
+
+      // 1. If in Telegram Mini App and invoice_link available, trigger native openInvoice
+      if (json.data.invoice_link && window.Telegram?.WebApp?.openInvoice) {
+        window.Telegram.WebApp.openInvoice(json.data.invoice_link, (status) => {
+          if (status === 'paid') {
+            toastMessage.value = t('payment_success_toast')
+            catalogStore.fetchWorkDetail(route.params.id)
+            pendingIntentId.value = null
+          }
+        })
+      } else {
+        toastMessage.value = t('invoice_sent_toast')
+      }
       window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium')
     } else {
       toastMessage.value = json.error?.message || 'To‘lov yaratishda xatolik'
@@ -218,6 +293,34 @@ async function buyTarget(targetType, targetId) {
     toastMessage.value = 'Xatolik: ' + err.message
   } finally {
     isBuying.value = false
+  }
+}
+
+async function simulatePayment() {
+  if (!pendingIntentId.value) return
+  isSimulating.value = true
+  try {
+    const token = authStore.token || localStorage.getItem('aikino_token')
+    const res = await fetch(`/api/v1/purchase-intents/${pendingIntentId.value}/simulate-pay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (res.ok) {
+      toastMessage.value = t('payment_success_toast')
+      pendingIntentId.value = null
+      await catalogStore.fetchWorkDetail(route.params.id)
+      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success')
+    } else {
+      const json = await res.json()
+      toastMessage.value = json.error?.message || 'Xatolik yuz berdi'
+    }
+  } catch (err) {
+    toastMessage.value = 'Xatolik: ' + err.message
+  } finally {
+    isSimulating.value = false
   }
 }
 

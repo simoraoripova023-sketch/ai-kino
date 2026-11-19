@@ -21,6 +21,12 @@ class PurchaseIntent extends Model
         'expires_at',
     ];
 
+    protected $appends = [
+        'target_title',
+        'target_poster',
+        'work_id',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -37,6 +43,33 @@ class PurchaseIntent extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class, 'intent_id');
+    }
+
+    public function getTargetTitleAttribute(): string
+    {
+        if ($this->target_type === 'work') {
+            return Work::find($this->target_id)?->title ?? 'AI Kino';
+        }
+        $ep = Episode::with('work')->find($this->target_id);
+        return $ep ? (($ep->work?->title ?? 'AI Kino') . " — {$ep->number}-qism") : 'AI Epizod';
+    }
+
+    public function getTargetPosterAttribute(): ?string
+    {
+        if ($this->target_type === 'work') {
+            return Work::find($this->target_id)?->poster_path;
+        }
+        $ep = Episode::with('work')->find($this->target_id);
+        return $ep?->work?->poster_path;
+    }
+
+    public function getWorkIdAttribute(): ?int
+    {
+        if ($this->target_type === 'work') {
+            return (int) $this->target_id;
+        }
+        $ep = Episode::find($this->target_id);
+        return $ep?->work_id;
     }
 }
 

@@ -121,6 +121,37 @@ class TelegramBotService
     }
 
     /**
+     * Create Stars (XTR) invoice link for Telegram Mini App openInvoice
+     */
+    public function createInvoiceLink(string $title, string $description, string $payload, int $amountStars): array
+    {
+        $params = [
+            'title' => $title,
+            'description' => $description,
+            'payload' => $payload,
+            'currency' => 'XTR',
+            'prices' => [
+                [
+                    'label' => $title,
+                    'amount' => $amountStars,
+                ],
+            ],
+        ];
+
+        try {
+            $response = Http::post("{$this->apiUrl}/createInvoiceLink", $params);
+            $data = $response->json();
+            return [
+                'ok' => $response->successful() && ($data['ok'] ?? false),
+                'link' => $data['result'] ?? null,
+                'raw' => $data,
+            ];
+        } catch (Exception $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Send Stars (XTR) invoice to chat
      */
     public function sendStarsInvoice(int $chatId, string $title, string $description, string $payload, int $amountStars): array

@@ -46,6 +46,12 @@ export const translations = {
     btn_unlock: 'Ochish',
     video_sent_toast: '🎬 Video bot chatiga yuborildi! Telegram chatiga o‘ting.',
     invoice_sent_toast: '⭐ To‘lov hisobi Telegram bot chatiga yuborildi!',
+    in_app_player: 'Ilova ichida ko‘rish',
+    open_in_bot: 'Telegram botda ochish',
+    close_player: 'Yopish',
+    simulate_pay_btn: '⚡ Sinov to‘lovi (Sandbox)',
+    payment_success_toast: '🎉 To‘lov muvaffaqiyatli qabul qilindi! Kontent ochildi.',
+    watch_movie: 'Filmga o‘tish',
 
     // Purchases
     my_purchases_title: 'Mening xaridlarim',
@@ -148,6 +154,12 @@ export const translations = {
     btn_unlock: 'Открыть',
     video_sent_toast: '🎬 Видео отправлено в чат бота! Откройте диалог.',
     invoice_sent_toast: '⭐ Счет для оплаты отправлен в чат Telegram бота!',
+    in_app_player: 'Смотреть в плеере',
+    open_in_bot: 'Открыть в боте Telegram',
+    close_player: 'Закрыть',
+    simulate_pay_btn: '⚡ Тестовая оплата (Sandbox)',
+    payment_success_toast: '🎉 Оплата прошла успешно! Контент открыт.',
+    watch_movie: 'Перейти к фильму',
 
     // Purchases
     my_purchases_title: 'Мои покупки',

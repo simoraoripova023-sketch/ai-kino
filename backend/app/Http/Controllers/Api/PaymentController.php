@@ -41,10 +41,18 @@ class PaymentController extends Controller
                 (int) $request->input('target_id')
             );
 
-            // Send Telegram Stars invoice directly to user's Telegram chat
+            // Create Telegram Stars invoice link for Mini App in-app payment
             $title = $intent->target_type === 'work' ? 'To\'liq asarga kirish' : 'Epizodga kirish';
             $desc = "AI Kino platformasida tomosha qilish uchun Telegram Stars to'lovi";
 
+            $linkResult = $this->botService->createInvoiceLink(
+                $title,
+                $desc,
+                $intent->invoice_payload,
+                $intent->amount_stars
+            );
+
+            // Also send invoice directly to user's Telegram chat as fallback
             $this->botService->sendStarsInvoice(
                 $user->telegram_id,
                 $title,
@@ -61,8 +69,9 @@ class PaymentController extends Controller
                     'amount_stars' => $intent->amount_stars,
                     'currency' => $intent->currency,
                     'status' => $intent->status,
-                    'invoice_action' => 'bot',
-                    'message' => 'To\'lov hisobi Telegram bot chatiga yuborildi',
+                    'invoice_link' => $linkResult['link'] ?? null,
+                    'invoice_action' => !empty($linkResult['link']) ? 'open_invoice' : 'bot',
+                    'message' => !empty($linkResult['link']) ? 'Hisob yaratildi' : 'To\'lov hisobi Telegram bot chatiga yuborildi',
                 ],
             ], 201);
         } catch (Exception $e) {
@@ -103,5 +112,36 @@ class PaymentController extends Controller
             ->get();
 
         return response()->json(['data' => $purchases]);
+    }
+
+    /**
+     * Simulate payment for local/sandbox testing
+     */
+    public function simulatePay(Request $request, string $id): JsonResponse
+    {
+        if (!config('app.debug')) {
+            return response()->json(['error' => ['code' => 'FORBIDDEN', 'message' => 'Simulyatsiya faqat debug rejimida mavjud']], 403);
+        }
+
+        $user = $request->user();
+        $intent = PurchaseIntent::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $fakePayment = [
+            'telegram_payment_charge_id' => 'sandbox_charge_' . \Illuminate\Support\Str::random(12),
+            'invoice_payload' => $intent->invoice_payload,
+            'total_amount' => $intent->amount_stars,
+            'currency' => 'XTR',
+        ];
+
+        $payment = $this->paymentService->handleSuccessfulPayment($fakePayment, $user->telegram_id);
+
+        return response()->json([
+            'data' => [
+                'message' => 'To‘lov muvaffaqiyatli simulyatsiya qilindi va kontent ochildi',
+                'payment' => $payment,
+            ],
+        ]);
     }
 }
