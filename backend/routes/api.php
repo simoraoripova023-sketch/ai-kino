@@ -16,10 +16,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/telegram', [AuthController::class, 'telegramAuth']);
     Route::post('/auth/dev-login', [AuthController::class, 'devLogin']);
 
-    // Catalog routes (public)
+    // Catalog & Stream routes (public)
     Route::get('/genres', [CatalogController::class, 'genres']);
     Route::get('/works', [CatalogController::class, 'index']);
     Route::get('/works/{id}', [CatalogController::class, 'show']);
+    Route::get('/episodes/{id}/stream', [PlaybackController::class, 'stream']);
 
     // Webhook route
     Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle']);

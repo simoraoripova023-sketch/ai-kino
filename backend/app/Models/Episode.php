@@ -15,6 +15,7 @@ class Episode extends Model
         'number',
         'title',
         'duration_sec',
+        'video_url',
         'file_id',
         'file_unique_id',
         'storage_chat_id',
@@ -43,7 +44,17 @@ class Episode extends Model
 
     public function getVideoUrlAttribute(): ?string
     {
-        // High quality web mp4 sample for instant in-app web player playback
+        // 1. Direct explicit video URL
+        if (!empty($this->attributes['video_url'])) {
+            return $this->attributes['video_url'];
+        }
+
+        // 2. Streamable proxy for Telegram video
+        if (!empty($this->file_id) && !str_starts_with($this->file_id, 'sample_')) {
+            return url("/api/v1/episodes/{$this->id}/stream");
+        }
+
+        // 3. Fallback sample video
         return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
     }
 

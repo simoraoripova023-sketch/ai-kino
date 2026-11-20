@@ -146,4 +146,39 @@ class PlaybackController extends Controller
 
         return response()->json(['data' => $progress]);
     }
+
+    /**
+     * Direct video stream resolver for in-app HTML5 player
+     */
+    public function stream(Request $request, int $id)
+    {
+        $episode = Episode::with('work')->findOrFail($id);
+
+        // 1. Direct custom video URL
+        $rawUrl = $episode->getRawOriginal('video_url');
+        if (!empty($rawUrl)) {
+            return redirect()->away($rawUrl);
+        }
+
+        // 2. Resolve Telegram video file path if file_id exists
+        if (!empty($episode->file_id) && !str_starts_with($episode->file_id, 'sample_')) {
+            $botToken = config('services.telegram.bot_token');
+            if ($botToken) {
+                try {
+                    $response = \Illuminate\Support\Facades\Http::timeout(5)->get("https://api.telegram.org/bot{$botToken}/getFile", [
+                        'file_id' => $episode->file_id,
+                    ]);
+                    $filePath = $response->json('result.file_path');
+                    if ($filePath) {
+                        return redirect()->away("https://api.telegram.org/file/bot{$botToken}/{$filePath}");
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Telegram getFile stream error for episode {$id}: " . $e->getMessage());
+                }
+            }
+        }
+
+        // 3. Fallback
+        return redirect()->away('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4');
+    }
 }

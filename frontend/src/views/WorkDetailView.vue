@@ -162,7 +162,7 @@
             <div>
               <div class="text-xs font-bold text-white">{{ ep.title || t('episode_num', { n: ep.number }) }}</div>
               <div class="text-[10px] text-gray-400 flex items-center gap-2">
-                <span>{{ Math.round(ep.duration_sec / 60) }} {{ t('minutes') }}</span>
+                <span>{{ formatDuration(ep.duration_sec) }}</span>
                 <span v-if="ep.access_state === 'free'" class="text-emerald-400 font-semibold">• {{ t('status_free') }}</span>
                 <span v-else-if="ep.access_state === 'owned'" class="text-blue-400 font-semibold">• {{ t('status_owned') }}</span>
                 <span v-else class="text-amber-400 font-semibold">• ⭐ {{ ep.price_stars }} {{ t('stars') }}</span>
@@ -221,6 +221,14 @@ const isWholeWorkOwned = computed(() => {
   if (authStore.user?.is_admin) return true
   return catalogStore.episodes.length > 0 && catalogStore.episodes.every(ep => ep.access_state === 'owned')
 })
+
+function formatDuration(sec) {
+  if (!sec || sec <= 0) return '0 soniya'
+  if (sec < 60) return `${sec} soniya`
+  const min = Math.floor(sec / 60)
+  const rem = sec % 60
+  return rem > 0 ? `${min} daq ${rem} soniya` : `${min} daq`
+}
 
 async function playEpisode(ep) {
   isPlaying.value = true

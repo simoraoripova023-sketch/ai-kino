@@ -270,6 +270,23 @@
             <textarea v-model="workForm.description" rows="3" required class="w-full px-3 py-2 rounded-xl bg-cinema-950 border border-white/10 text-white text-xs"></textarea>
           </div>
 
+          <!-- Genres Selector -->
+          <div>
+            <label class="block text-gray-400 text-[10px] mb-1.5 font-bold">Janrlar (Katalogda qidiruv uchun)</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="g in genresList"
+                :key="g.id"
+                type="button"
+                @click="toggleGenre(g.id)"
+                class="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer"
+                :class="workForm.genre_ids?.includes(g.id) ? 'bg-cinema-gold text-black border-cinema-gold' : 'bg-cinema-950 text-gray-400 border-white/10 hover:border-white/30'"
+              >
+                #{{ g.name_uz }}
+              </button>
+            </div>
+          </div>
+
           <div class="flex gap-2 pt-2">
             <button type="button" @click="showWorkModal = false" class="flex-1 py-2 rounded-xl bg-cinema-800 text-gray-300 font-bold">
               {{ t('btn_cancel') }}
@@ -302,6 +319,10 @@
             <input v-model.number="newEpisodeForm.number" type="number" placeholder="№" class="px-2 py-1.5 rounded-lg bg-cinema-900 border border-white/10 text-white text-xs" />
             <input v-model="newEpisodeForm.title" placeholder="Qism nomi" class="col-span-2 px-2 py-1.5 rounded-lg bg-cinema-900 border border-white/10 text-white text-xs" />
           </div>
+          <div class="grid grid-cols-3 gap-2">
+            <input v-model="newEpisodeForm.video_url" placeholder="Video URL (ixtiyoriy MP4 havola)" class="col-span-2 px-2 py-1.5 rounded-lg bg-cinema-900 border border-white/10 text-white text-xs" />
+            <input v-model.number="newEpisodeForm.duration_sec" type="number" placeholder="Soniya (sek)" class="px-2 py-1.5 rounded-lg bg-cinema-900 border border-white/10 text-white text-xs" />
+          </div>
           <button 
             @click="addEpisode"
             :disabled="isSubmitting"
@@ -327,7 +348,7 @@
               </span>
               <div>
                 <div class="font-bold text-white">{{ ep.title || (ep.number + '-qism') }}</div>
-                <div class="text-[10px] text-gray-400">{{ Math.round(ep.duration_sec / 60) }} daq • {{ ep.status }}</div>
+                <div class="text-[10px] text-gray-400">{{ formatDuration(ep.duration_sec) }} • {{ ep.status }}</div>
               </div>
             </div>
             <button 
@@ -362,6 +383,7 @@ const overview = ref(null)
 const works = ref([])
 const payments = ref([])
 const auditLogs = ref([])
+const genresList = ref([])
 
 const selectedWorkForEpisodes = ref(null)
 const currentEpisodes = ref([])
@@ -376,12 +398,35 @@ const workForm = ref({
   poster_path: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80',
   pricing_mode: 'free',
   price_stars: 0,
+  genre_ids: [],
 })
 
 const newEpisodeForm = ref({
   number: 1,
   title: '',
+  video_url: '',
+  duration_sec: 60,
 })
+
+function formatDuration(sec) {
+  if (!sec || sec <= 0) return '0 soniya'
+  if (sec < 60) return `${sec} soniya`
+  const min = Math.floor(sec / 60)
+  const rem = sec % 60
+  return rem > 0 ? `${min} daq ${rem} soniya` : `${min} daq`
+}
+
+function toggleGenre(genreId) {
+  if (!workForm.value.genre_ids) {
+    workForm.value.genre_ids = []
+  }
+  const idx = workForm.value.genre_ids.indexOf(genreId)
+  if (idx > -1) {
+    workForm.value.genre_ids.splice(idx, 1)
+  } else {
+    workForm.value.genre_ids.push(genreId)
+  }
+}
 
 function getHeaders() {
   const token = authStore.token || localStorage.getItem('aikino_token')
@@ -425,6 +470,13 @@ async function loadAll() {
       const json = await resAudit.json()
       auditLogs.value = json.data?.data || json.data || []
     }
+
+    // 5. Genres
+    const resGenres = await fetch('/api/v1/genres')
+    if (resGenres.ok) {
+      const json = await resGenres.json()
+      genresList.value = json.data || []
+    }
   } catch (err) {
     alertMessage.value = 'Yuklashda xatolik: ' + err.message
   } finally {
@@ -443,8 +495,9 @@ function openCreateModal() {
     language: 'uz',
     age_rating: '12+',
     poster_path: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80',
-    pricing_mode: 'work',
-    price_stars: 25,
+    pricing_mode: 'free',
+    price_stars: 0,
+    genre_ids: [],
   }
   showWorkModal.value = true
 }
@@ -462,6 +515,7 @@ function openEditModal(work) {
     poster_path: work.poster_path,
     pricing_mode: work.pricing_mode,
     price_stars: work.price_stars,
+    genre_ids: work.genres ? work.genres.map(g => g.id) : [],
   }
   showWorkModal.value = true
 }
@@ -551,10 +605,8 @@ async function addEpisode() {
       body: JSON.stringify({
         number: newEpisodeForm.value.number,
         title: newEpisodeForm.value.title,
-        duration_sec: 1200,
-        file_id: 'sample_file_id_' + Date.now(),
-        storage_chat_id: -1001234567890,
-        storage_message_id: 100,
+        video_url: newEpisodeForm.value.video_url || null,
+        duration_sec: newEpisodeForm.value.duration_sec || 60,
         status: 'published',
       }),
     })

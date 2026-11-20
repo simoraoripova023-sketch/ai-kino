@@ -63,6 +63,20 @@
         </div>
       </header>
 
+      <!-- Browser Notice (when opened outside Telegram WebApp) -->
+      <div v-if="!authStore.rawInitData && showBrowserNotice" class="bg-gradient-to-r from-amber-500/15 via-cinema-900 to-purple-900/20 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-[11px] text-amber-200">
+        <div class="flex items-center gap-2">
+          <span>📱</span>
+          <span>To‘liq ekranli qulay tomosha uchun Telegram'da oching:</span>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <a href="https://t.me/Aimedias_bot" target="_blank" class="px-2 py-0.5 rounded-md bg-amber-400 text-black font-extrabold text-[10px] hover:bg-amber-300">
+            Botda ochish
+          </a>
+          <button @click="showBrowserNotice = false" class="text-gray-400 hover:text-white px-1 font-bold text-sm leading-none">&times;</button>
+        </div>
+      </div>
+
       <!-- Main Content Area -->
       <main class="flex-1 px-4 py-4">
         <router-view />
@@ -142,7 +156,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { t, currentLang, toggleLanguage } from './i18n'
@@ -150,6 +164,7 @@ import { t, currentLang, toggleLanguage } from './i18n'
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const showBrowserNotice = ref(true)
 
 // Setup Telegram Native BackButton and Theme
 function setupTelegramNativeUI() {

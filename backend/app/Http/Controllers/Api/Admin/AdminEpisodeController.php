@@ -32,17 +32,23 @@ class AdminEpisodeController extends Controller
             'number' => 'required|integer|min:1',
             'title' => 'nullable|string|max:255',
             'duration_sec' => 'nullable|integer|min:0',
-            'file_id' => 'required|string|max:255',
+            'video_url' => 'nullable|string|max:1024',
+            'file_id' => 'nullable|string|max:255',
             'file_unique_id' => 'nullable|string|max:255',
-            'storage_chat_id' => 'required|integer',
-            'storage_message_id' => 'required|integer',
+            'storage_chat_id' => 'nullable|integer',
+            'storage_message_id' => 'nullable|integer',
             'is_preview' => 'nullable|boolean',
             'price_stars' => 'nullable|integer|min:1',
             'status' => 'nullable|in:draft,published,hidden',
         ]);
 
         $validated['work_id'] = $work->id;
-        $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['status'] = $validated['status'] ?? 'published';
+        if (empty($validated['file_id']) && !empty($validated['video_url'])) {
+            $validated['file_id'] = 'web_' . \Illuminate\Support\Str::random(16);
+            $validated['storage_chat_id'] = 0;
+            $validated['storage_message_id'] = 0;
+        }
 
         $episode = Episode::create($validated);
 
@@ -70,6 +76,7 @@ class AdminEpisodeController extends Controller
             'title' => 'nullable|string|max:255',
             'number' => 'sometimes|integer|min:1',
             'duration_sec' => 'nullable|integer|min:0',
+            'video_url' => 'nullable|string|max:1024',
             'is_preview' => 'nullable|boolean',
             'price_stars' => 'nullable|integer|min:1',
         ]);
